@@ -1,0 +1,19 @@
+# Data (tracked by DVC)
+data/auto-mpg.data
+data/processed/
+
+# Model binaries (tracked by DVC)
+models/
+
+# Python
+__pycache__/
+*.pyc
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Environment
+.env
+.venv/
+venv/

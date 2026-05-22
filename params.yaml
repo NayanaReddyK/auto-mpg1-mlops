@@ -1,0 +1,13 @@
+data:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  type: linear_regression   # options: linear_regression, svr_rbf, decision_tree
+
+svr:
+  kernel: rbf
+  epsilon: 0.1
+
+decision_tree:
+  max_depth: 4
