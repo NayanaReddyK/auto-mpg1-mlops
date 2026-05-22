@@ -1,9 +1,3 @@
-"""
-preprocess.py
-Loads raw auto-mpg data, cleans it, encodes features,
-scales, splits, and saves train/test splits to data/processed/.
-"""
-
 import os
 import yaml
 import numpy as np
@@ -12,9 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
 
-RAW_DATA    = os.path.join("data", "auto-mpg.data")
-PROCESSED   = os.path.join("data", "processed")
-MODELS_DIR  = "models"
+RAW_DATA   = os.path.join("data", "auto-mpg.data")
+PROCESSED  = os.path.join("data", "processed")
+MODELS_DIR = "models"
 PARAMS_FILE = "params.yaml"
 
 COLUMN_NAMES = [
@@ -22,41 +16,37 @@ COLUMN_NAMES = [
     "weight", "acceleration", "model_year", "origin", "car_name",
 ]
 
-
 def load_params():
     with open(PARAMS_FILE) as f:
         return yaml.safe_load(f)
 
-
-def load_and_clean(path: str) -> pd.DataFrame:
+def load_and_clean(path):
     rows = []
     with open(path, 'r') as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
-            # split on whitespace max 8 times to keep car_name together
-            parts = line.split(None, 8)
-            if len(parts) >= 9:  # Changed from == 9 to >= 9
-                # If more than 9 parts, join extra parts into car_name (last column)
-                if len(parts) > 9:
-                    parts = parts[:8] + [' '.join(parts[8:])]
-                rows.append(parts)
+            parts = line.split()
+            if len(parts) < 9:
+                continue
+            # first 8 are numeric fields, rest is car_name
+            row = parts[:8] + [' '.join(parts[8:])]
+            rows.append(row)
     df = pd.DataFrame(rows, columns=COLUMN_NAMES)
     df = df[df["horsepower"] != "?"].copy()
-    df["horsepower"] = df["horsepower"].astype(float)
-    for col in ["mpg","cylinders","displacement","weight","acceleration","model_year","origin"]:
-        df[col] = df[col].astype(float)
+    for col in ["mpg","cylinders","displacement","horsepower",
+                "weight","acceleration","model_year","origin"]:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df = df.dropna()
     return df
 
-def engineer_features(df: pd.DataFrame):
-    X = df.drop("mpg", axis=1)
+def engineer_features(df):
+    X = df.drop("mpg", axis=1).copy()
     y = df["mpg"]
     le = LabelEncoder()
-    X = X.copy()
     X["car_name"] = le.fit_transform(X["car_name"])
     return X, y, le
-
 
 def main():
     params = load_params()
@@ -93,7 +83,6 @@ def main():
     joblib.dump(le,     os.path.join(MODELS_DIR, "label_encoder.pkl"))
 
     print("Preprocessing done. Artifacts saved.")
-
 
 if __name__ == "__main__":
     main()
