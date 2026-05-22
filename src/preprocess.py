@@ -37,7 +37,10 @@ def load_and_clean(path: str) -> pd.DataFrame:
                 continue
             # split on whitespace max 8 times to keep car_name together
             parts = line.split(None, 8)
-            if len(parts) == 9:
+            if len(parts) >= 9:  # Changed from == 9 to >= 9
+                # If more than 9 parts, join extra parts into car_name (last column)
+                if len(parts) > 9:
+                    parts = parts[:8] + [' '.join(parts[8:])]
                 rows.append(parts)
     df = pd.DataFrame(rows, columns=COLUMN_NAMES)
     df = df[df["horsepower"] != "?"].copy()
@@ -45,7 +48,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     for col in ["mpg","cylinders","displacement","weight","acceleration","model_year","origin"]:
         df[col] = df[col].astype(float)
     return df
-
 
 def engineer_features(df: pd.DataFrame):
     X = df.drop("mpg", axis=1)
