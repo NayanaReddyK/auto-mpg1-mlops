@@ -29,7 +29,7 @@ def load_params():
 
 
 def load_and_clean(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path, names=COLUMN_NAMES, delim_whitespace=True, quotechar='"')
+    df = pd.read_csv(path, names=COLUMN_NAMES, sep=r'\s+', quotechar='"', engine='python')
     df = df[df["horsepower"] != "?"].copy()
     df["horsepower"] = df["horsepower"].astype(float)
     return df
