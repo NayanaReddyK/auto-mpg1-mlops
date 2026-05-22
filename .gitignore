@@ -2,8 +2,9 @@
 data/auto-mpg.data
 data/processed/
 
-# Model binaries (tracked by DVC)
-models/
+# Model binaries (tracked by DVC, ignore the actual files)
+models/*.pkl
+models/*.joblib
 
 # Python
 __pycache__/
