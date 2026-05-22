@@ -29,9 +29,21 @@ def load_params():
 
 
 def load_and_clean(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path, names=COLUMN_NAMES, sep='\s+', on_bad_lines='skip', engine='python')
+    rows = []
+    with open(path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            # split on whitespace max 8 times to keep car_name together
+            parts = line.split(None, 8)
+            if len(parts) == 9:
+                rows.append(parts)
+    df = pd.DataFrame(rows, columns=COLUMN_NAMES)
     df = df[df["horsepower"] != "?"].copy()
     df["horsepower"] = df["horsepower"].astype(float)
+    for col in ["mpg","cylinders","displacement","weight","acceleration","model_year","origin"]:
+        df[col] = df[col].astype(float)
     return df
 
 
